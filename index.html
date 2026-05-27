@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voce in Spartito</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="Trascrizione voce principale">
+        <header class="topbar">
+          <div class="brand" aria-label="Voce in Spartito">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 32 32" role="img">
+                <path d="M10 22.5c0 2.8 2.3 5 5.1 5s5-2.2 5-5V8.2l7.1-1.7v-4L16.9 5v17.5c0 1-.8 1.8-1.8 1.8s-1.9-.8-1.9-1.8.9-1.8 1.9-1.8c.5 0 .9.1 1.3.4v-3.5c-.4-.1-.9-.2-1.3-.2-2.8 0-5.1 2.3-5.1 5.1Z" />
+              </svg>
+            </span>
+            <span>Voce in Spartito</span>
+          </div>
+          <div class="top-actions">
+            <button class="icon-button" id="demoButton" type="button" title="Carica esempio">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5v15l13-7.5-13-7.5Z" /></svg>
+            </button>
+            <button class="icon-button" id="resetButton" type="button" title="Azzera">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.1 7.3A8 8 0 1 1 4 13h2.2a5.8 5.8 0 1 0 1.5-3.9L10 11.4H3.8V5.2l2.3 2.1Z" /></svg>
+            </button>
+          </div>
+        </header>
+
+        <section class="hero-panel">
+          <div class="upload-zone" id="dropZone">
+            <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.webm" />
+            <div class="upload-glyph" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M24 7 12.8 18.2l2.9 2.9 6.2-6.2V32h4.2V14.9l6.2 6.2 2.9-2.9L24 7Z" /><path d="M9 36h30v5H9v-5Z" /></svg>
+            </div>
+            <h1>Carica un audio, ottieni lo spartito della voce principale.</h1>
+            <p>Analisi locale nel browser per estrarre la melodia dominante, ripulirla e disegnarla su pentagramma.</p>
+            <label class="primary-button" for="audioInput">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v9.2l3.6-3.6L18 11l-6 6-6-6 1.4-1.4 3.6 3.6V4Z" /><path d="M5 19h14v2H5v-2Z" /></svg>
+              Scegli file audio
+            </label>
+            <span class="drop-note">MP3, WAV, M4A, AAC, OGG, FLAC, WebM</span>
+          </div>
+
+          <aside class="control-panel">
+            <div class="file-card">
+              <span class="small-label">File</span>
+              <strong id="fileName">Nessun file caricato</strong>
+              <audio id="audioPlayer" controls></audio>
+            </div>
+
+            <div class="controls-grid">
+              <label>
+                <span>Tempo</span>
+                <input id="tempoInput" type="number" min="40" max="220" value="96" />
+              </label>
+              <label>
+                <span>Tonalità</span>
+                <select id="keySelect">
+                  <option value="C">Do maggiore</option>
+                  <option value="G">Sol maggiore</option>
+                  <option value="D">Re maggiore</option>
+                  <option value="A">La maggiore</option>
+                  <option value="F">Fa maggiore</option>
+                  <option value="Bb">Sib maggiore</option>
+                  <option value="Am">La minore</option>
+                  <option value="Em">Mi minore</option>
+                </select>
+              </label>
+              <label>
+                <span>Sensibilità voce</span>
+                <input id="sensitivityInput" type="range" min="0.08" max="0.32" step="0.01" value="0.16" />
+              </label>
+              <label>
+                <span>Valore minimo</span>
+                <select id="gridSelect">
+                  <option value="16">Sedicesimi</option>
+                  <option value="8" selected>Ottavi</option>
+                  <option value="4">Quarti</option>
+                </select>
+              </label>
+            </div>
+
+            <button class="analyze-button" id="analyzeButton" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h3v16H4V4Zm6 5h3v11h-3V9Zm6-4h3v15h-3V5Z" /></svg>
+              Analizza e genera spartito
+            </button>
+          </aside>
+        </section>
+
+        <section class="progress-panel" aria-live="polite">
+          <div class="status-copy">
+            <span id="statusTitle">Pronto</span>
+            <strong id="statusDetail">Carica un file per iniziare.</strong>
+          </div>
+          <div class="meter"><span id="progressBar"></span></div>
+        </section>
+
+        <section class="score-layout">
+          <div class="score-toolbar">
+            <div>
+              <span class="small-label">Output</span>
+              <h2>Spartito generato</h2>
+            </div>
+            <div class="score-actions">
+              <button id="playMelodyButton" type="button" disabled title="Ascolta melodia">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z" /></svg>
+              </button>
+              <button id="downloadXmlButton" type="button" disabled title="Scarica MusicXML">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v8.2l3-3 1.4 1.4L12 16l-5.4-5.4L8 9.2l3 3V4Z" /><path d="M5 19h14v2H5v-2Z" /></svg>
+              </button>
+              <button id="downloadSvgButton" type="button" disabled title="Scarica SVG">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4V4Zm2 2v12h12V6H6Zm2.5 9 2.6-3.3 2 2.4 1.4-1.8L17 15H8.5Z" /></svg>
+              </button>
+            </div>
+          </div>
+          <div class="score-scroll">
+            <div id="scoreCanvas" class="score-canvas">
+              <div class="empty-score">
+                <svg viewBox="0 0 120 48" aria-hidden="true">
+                  <path d="M4 9h112M4 16.5h112M4 24h112M4 31.5h112M4 39h112" />
+                  <circle cx="42" cy="24" r="6" />
+                  <path d="M48 24V7" />
+                  <circle cx="75" cy="31.5" r="6" />
+                  <path d="M81 31.5V14" />
+                </svg>
+                <span>Lo spartito apparirà qui.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="insights">
+          <div>
+            <span class="small-label">Note rilevate</span>
+            <strong id="noteCount">0</strong>
+          </div>
+          <div>
+            <span class="small-label">Estensione</span>
+            <strong id="rangeText">-</strong>
+          </div>
+          <div>
+            <span class="small-label">Durata trascritta</span>
+            <strong id="durationText">-</strong>
+          </div>
+          <div>
+            <span class="small-label">Affidabilità media</span>
+            <strong id="confidenceText">-</strong>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
